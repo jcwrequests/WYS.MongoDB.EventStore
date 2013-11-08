@@ -60,6 +60,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="EventStore.cs" />
+    <Compile Include="Events\SampleEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.EventStore.Storage;
@@ -16,6 +17,7 @@ namespace MongoDB.EventStore.Core.Store
         {
             if (client == null) throw new ArgumentNullException("client");
             this.client = client;
+            BsonClassMap.RegisterClassMap<MongoEventDocument>();
         }
         public EventStream LoadEventStream(IIdentity id)
         {
@@ -73,7 +75,7 @@ namespace MongoDB.EventStore.Core.Store
             var events = db.GetCollection<MongoEventDocument>("Events");
             var docs = events.FindAllAs<MongoEventDocument>();
             if (docs == null) return null;
-            return docs.SelectMany(doc => doc.events).ToList();
+            return docs.ToList().SelectMany(doc => doc.events).ToList();
         }
 
         public event NewEventsArrivedHandler NewEventsArrived;
