@@ -23,7 +23,7 @@ namespace MongoDB.EventStore.Core.Store
         {
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
-            var query = Query.EQ("id", id.ToString());
+            var query = Query<MongoEventDocument>.EQ(s => s.id, id);
             var events = db.GetCollection<MongoEventDocument>("Events");
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) return null;
@@ -34,7 +34,7 @@ namespace MongoDB.EventStore.Core.Store
         {
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
-            var query = Query.EQ("id", id.ToString());
+            var query = Query<MongoEventDocument>.EQ(s => s.id, id);
             var events = db.GetCollection<MongoEventDocument>("Events");
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) return null;
@@ -49,7 +49,8 @@ namespace MongoDB.EventStore.Core.Store
         {
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
-            var query = Query.EQ("id", id.ToString());
+            var query = Query<MongoEventDocument>.EQ(s => s.id, id);
+            
             var events = db.GetCollection<MongoEventDocument>("Events");
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) events.Insert<MongoEventDocument>(new MongoEventDocument

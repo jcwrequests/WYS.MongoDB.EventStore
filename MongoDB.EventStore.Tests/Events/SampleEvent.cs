@@ -10,11 +10,11 @@ namespace EventStore.Tests.Events
     [Serializable]
     public class SampleID : IIdentity
     {
-        public SampleID(Guid value)
+        public SampleID(int value)
         {
             this.value = value;
         }
-        public Guid value {get;set;}
+        public int value {get;set;}
     }
 
     [Serializable]

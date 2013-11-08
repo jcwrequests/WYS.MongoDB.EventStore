@@ -12,13 +12,13 @@ namespace EventStore.Tests
     public class EventStore
     {
         private MongoClient client;
-        private Events.SampleID id = new Events.SampleID(Guid.NewGuid());
+        private Events.SampleID id = new Events.SampleID(1);
 
         [TestInitialize]
         public void CREATE_CLIENT()
         {
             client = new MongoClient();
-            client.GetServer().GetDatabase("EventStore").Drop();
+            //client.GetServer().GetDatabase("EventStore").Drop();
             BsonClassMap.RegisterClassMap<Events.SampleEvent>();
             BsonClassMap.RegisterClassMap<Events.SampleID>();
         }
@@ -37,7 +37,15 @@ namespace EventStore.Tests
         public void STORE_NEW_EVENTS_ON_EXISTSING_DOCUMENT()
         {
              MongoEventStore store = new MongoEventStore(client);
+             Events.SampleEvent _event = new Events.SampleEvent { Message = "Test", id = id };
+             IList<IEvent> events = new List<IEvent>();
+             events.Add(_event);
+             store.AppendToStream(id, 1, events);
 
+             Events.SampleEvent _event2 = new Events.SampleEvent { Message = "Test 2", id = id };
+             IList<IEvent> events2 = new List<IEvent>();
+             events2.Add(_event2);
+             store.AppendToStream(id, 2, events2);
         }
 
         [TestMethod]
