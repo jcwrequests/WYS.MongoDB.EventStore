@@ -46,16 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentStrategy.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="LoggingWrapper.cs" />
     <Compile Include="Projections\DomainEventPublisher.cs" />
-    <Compile Include="Projections\IDocumentWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Store\AppendOnlyStream.cs" />
-    <Compile Include="Store\EventStore.cs" />
-    <Compile Include="Store\FileDocumentReaderWriter.cs" />
-    <Compile Include="Store\IAppendOnlyStore.cs" />
     <Compile Include="Store\IEventStore.cs" />
     <Compile Include="Store\MongoEventDocument.cs" />
     <Compile Include="Store\MongoEventStore.cs" />
