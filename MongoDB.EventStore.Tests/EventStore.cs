@@ -5,19 +5,27 @@ using MongoDB.EventStore;
 using MongoDB.EventStore.Core.Store;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization;
+using System.Linq;
 
 namespace EventStore.Tests
 {
     [TestClass]
-    public class EventStore
+    public class EventStoregdob
     {
         private MongoClient client;
         private Events.SampleID id = new Events.SampleID(1);
-
+        
         [TestInitialize]
         public void CREATE_CLIENT()
         {
-            client = new MongoClient();
+      
+            MongoConnectionStringBuilder builder = new MongoConnectionStringBuilder();
+            builder.Journal = true;
+            builder.Server = new MongoServerAddress("localhost");
+            string connectionString = builder.ToString();
+           
+            client = new MongoClient(connectionString);
+            
             //client.GetServer().GetDatabase("EventStore").Drop();
             BsonClassMap.RegisterClassMap<Events.SampleEvent>();
             BsonClassMap.RegisterClassMap<Events.SampleID>();
@@ -61,6 +69,74 @@ namespace EventStore.Tests
              MongoEventStore store = new MongoEventStore(client);
              var events = store.LoadEventStream(id);
              Assert.IsFalse(events == null);
+        }
+        [TestMethod]
+        public void INSERT_HUNDRED_EVENTS()
+        {
+            MongoEventStore store = new MongoEventStore(client);
+            client.GetServer().GetDatabase("EventStore").Drop();
+            Enumerable.
+                Range(1, 100).
+                ToList().
+                ForEach(i =>
+                {
+                    var newid = new Events.SampleID(i);
+                    Events.SampleEvent _event = new Events.SampleEvent { Message = "Test", id = newid };
+                    IList<IEvent> events = new List<IEvent>();
+                    events.Add(_event);
+                    store.AppendToStream(newid, 1, events);
+                });
+        }
+        [TestMethod]
+        public void INSERT_THOUSAND_EVENTS()
+        {
+            MongoEventStore store = new MongoEventStore(client);
+            client.GetServer().GetDatabase("EventStore").Drop();
+            Enumerable.
+                Range(1, 1000).
+                ToList().
+                ForEach(i =>
+                {
+                    var newid = new Events.SampleID(i);
+                    Events.SampleEvent _event = new Events.SampleEvent { Message = "Test", id = newid };
+                    IList<IEvent> events = new List<IEvent>();
+                    events.Add(_event);
+                    store.AppendToStream(newid, 1, events);
+                });
+        }
+        [TestMethod]
+        public void INSERT_HUNDERD_THOUSAND_EVENTS()
+        {
+            MongoEventStore store = new MongoEventStore(client);
+            client.GetServer().GetDatabase("EventStore").Drop();
+            Enumerable.
+                Range(1, 100000).
+                ToList().
+                ForEach(i =>
+                {
+                    var newid = new Events.SampleID(i);
+                    Events.SampleEvent _event = new Events.SampleEvent { Message = "Test", id = newid };
+                    IList<IEvent> events = new List<IEvent>();
+                    events.Add(_event);
+                    store.AppendToStream(newid, 1, events);
+                });
+        }
+        [TestMethod]
+        public void INSERT_HUNDERD_THOUSAND_EVENTS_INTO_ONE_DOC()
+        {
+            MongoEventStore store = new MongoEventStore(client);
+            client.GetServer().GetDatabase("EventStore").Drop();
+            Enumerable.
+                Range(1, 100000).
+                ToList().
+                ForEach(i =>
+                {
+                    var newid = new Events.SampleID(1);
+                    Events.SampleEvent _event = new Events.SampleEvent { Message = "Test", id = newid };
+                    IList<IEvent> events = new List<IEvent>();
+                    events.Add(_event);
+                    store.AppendToStream(newid, i, events);
+                });
         }
     }
 }

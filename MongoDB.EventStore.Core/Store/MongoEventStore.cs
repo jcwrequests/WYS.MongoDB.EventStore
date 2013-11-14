@@ -13,18 +13,22 @@ namespace MongoDB.EventStore.Core.Store
     public class MongoEventStore : IEventStore
     {
         private MongoClient client;
+        private MongoCollectionSettings _commitSettings; 
+
         public MongoEventStore(MongoClient client)
         {
             if (client == null) throw new ArgumentNullException("client");
             this.client = client;
             BsonClassMap.RegisterClassMap<MongoEventDocument>();
+            _commitSettings = new MongoCollectionSettings {AssignIdOnInsert = false, WriteConcern = WriteConcern.Acknowledged};
+
         }
         public EventStream LoadEventStream(IIdentity id)
         {
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
             var query = Query<MongoEventDocument>.EQ(s => s.id, id);
-            var events = db.GetCollection<MongoEventDocument>("Events");
+            var events = db.GetCollection<MongoEventDocument>("Events",_commitSettings);
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) return null;
             return new EventStream { Events = doc.events, Version = doc.version };
@@ -35,7 +39,7 @@ namespace MongoDB.EventStore.Core.Store
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
             var query = Query<MongoEventDocument>.EQ(s => s.id, id);
-            var events = db.GetCollection<MongoEventDocument>("Events");
+            var events = db.GetCollection<MongoEventDocument>("Events",_commitSettings);
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) return null;
             return new EventStream { Events = doc.events.
@@ -51,7 +55,15 @@ namespace MongoDB.EventStore.Core.Store
             var db = server.GetDatabase("EventStore");
             var query = Query<MongoEventDocument>.EQ(s => s.id, id);
             
-            var events = db.GetCollection<MongoEventDocument>("Events");
+            var events = db.GetCollection<MongoEventDocument>("Events",_commitSettings);
+
+            //events.Insert<MongoEventDocument>(new MongoEventDocument
+            //{
+            //    events = newEvents.ToList<IEvent>(),
+            //    id = id,
+            //    version = 1
+            //});
+
             var doc = events.FindOneAs<MongoEventDocument>(query);
             if (doc == null) events.Insert<MongoEventDocument>(new MongoEventDocument
             {
@@ -62,7 +74,7 @@ namespace MongoDB.EventStore.Core.Store
             if (doc != null)
             {
                 doc.events.AddRange(newEvents);
-                doc.version  += 1;
+                doc.version += 1;
                 events.Save(doc);
             }
 
@@ -73,7 +85,7 @@ namespace MongoDB.EventStore.Core.Store
         {
             var server = this.client.GetServer();
             var db = server.GetDatabase("EventStore");
-            var events = db.GetCollection<MongoEventDocument>("Events");
+            var events = db.GetCollection<MongoEventDocument>("Events",_commitSettings);
             var docs = events.FindAllAs<MongoEventDocument>();
             if (docs == null) return null;
             return docs.ToList().SelectMany(doc => doc.events).ToList();
